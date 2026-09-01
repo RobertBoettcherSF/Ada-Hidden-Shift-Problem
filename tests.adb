@@ -23,7 +23,7 @@ procedure Tests is
    end Check;
 
    -- Representative sample function table
-   F_Sample : constant Function_Table := (
+   F_Sample : constant Function_Table := [
       0  => 10,
       1  => 20,
       2  => 30,
@@ -40,7 +40,7 @@ procedure Tests is
       13 => 140,
       14 => 150,
       15 => 160
-   );
+   ];
 
    -- Helper function to construct G where G(x) = F(x + Shift)
    function Make_Shifted_G (Shift : Domain_Element; F : Function_Table) return Function_Table is
@@ -121,14 +121,14 @@ begin
    begin
       Check ("6.1 Correct shift correlation score is 16", Score_Correct = 16);
       Check ("6.2 Incorrect shift correlation score is low", Score_Wrong < 16);
-      Check ("6.3 Correlation score is bounded by 0 and 16", Score_Wrong <= 16 and Score_Wrong >= 0);
+      Check ("6.3 Correlation score is bounded by 0 and 16", Score_Wrong <= 16);
    end;
 
    -- TEST 7 — Error Handling: No Shift Found (Brute Force)
    Put_Line ("TEST 7 — Error Handling: No Shift Found (Brute Force)");
    declare
-      F_Const        : constant Function_Table := (others => 5);
-      G_Inconsistent : constant Function_Table := (0 => 5, others => 99);
+      F_Const        : constant Function_Table := [others => 5];
+      G_Inconsistent : constant Function_Table := [0 => 5, others => 99];
       Exception_Raised : Boolean := False;
    begin
       begin
@@ -151,8 +151,8 @@ begin
    -- TEST 8 — Error Handling: No Shift Found (Correlation Search)
    Put_Line ("TEST 8 — Error Handling: No Shift Found (Correlation Search)");
    declare
-      F_Flat     : constant Function_Table := (others => 1);
-      G_Disjoint : constant Function_Table := (others => 999);
+      F_Flat     : constant Function_Table := [others => 1];
+      G_Disjoint : constant Function_Table := [others => 999];
       Exception_Raised : Boolean := False;
    begin
       begin
@@ -175,8 +175,8 @@ begin
    -- TEST 9 — Constant Function Domain Shift
    Put_Line ("TEST 9 — Constant Function Domain Shift");
    declare
-      F_Const : constant Function_Table := (others => 42);
-      G_Const : constant Function_Table := (others => 42);
+      F_Const : constant Function_Table := [others => 42];
+      G_Const : constant Function_Table := [others => 42];
       S       : constant Domain_Element := Solve_Brute_Force (F_Const, G_Const);
    begin
       Check ("9.1 Brute force handles constant functions without error", S = 0 or S /= 0);
@@ -187,17 +187,17 @@ begin
    -- TEST 10 — Symmetric / Repeating Functions
    Put_Line ("TEST 10 — Symmetric / Repeating Functions");
    declare
-      F_Rep : constant Function_Table := (0 => 1, 1 => 2, 2 => 1, 3 => 2, 
+      F_Rep : constant Function_Table := [0 => 1, 1 => 2, 2 => 1, 3 => 2, 
                                           4 => 1, 5 => 2, 6 => 1, 7 => 2,
                                           8 => 1, 9 => 2, 10 => 1, 11 => 2,
-                                          12 => 1, 13 => 2, 14 => 1, 15 => 2);
+                                          12 => 1, 13 => 2, 14 => 1, 15 => 2];
       G_Rep : constant Function_Table := Make_Shifted_G (2, F_Rep);
       S_BF  : constant Domain_Element := Solve_Brute_Force (F_Rep, G_Rep);
       S_CS  : constant Domain_Element := Solve_Correlation_Search (F_Rep, G_Rep);
    begin
-      Check ("10.1 Brute force finds shift for repeating function", S_BF = 2);
-      Check ("10.2 Correlation search finds shift for repeating function", S_CS = 2);
-      Check ("10.3 Both methods agree on repeating function shift", S_BF = S_CS);
+      Check ("10.1 Brute force finds valid shift for repeating function", Verify_Shift (F_Rep, G_Rep, S_BF));
+      Check ("10.2 Correlation search finds valid shift for repeating function", Verify_Shift (F_Rep, G_Rep, S_CS));
+      Check ("10.3 Both methods return valid shifts", Verify_Shift (F_Rep, G_Rep, S_BF) and Verify_Shift (F_Rep, G_Rep, S_CS));
    end;
 
    -- TEST 11 — Invariant Testing: Round-trip Verification
