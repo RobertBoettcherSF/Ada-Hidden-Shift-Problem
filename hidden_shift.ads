@@ -27,7 +27,7 @@ package Hidden_Shift is
    -- Computes cross-correlation scores for each shift s and selects the maximum correlation peak.
    function Solve_Correlation_Search (F : Function_Table; G : Function_Table) return Domain_Element
      with Pre  => True,
-          Post => True;
+          Post => Compute_Correlation (F, G, Solve_Correlation_Search'Result) <= 16;
 
    -- Variant 3: Shift Verification (Helper / Public check)
    -- Verifies whether a given candidate shift s satisfies g(x) = f(x + s) for all x in the domain.
